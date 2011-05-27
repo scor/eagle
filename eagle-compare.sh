@@ -1,6 +1,10 @@
-for img in `cd old; ls *.png`
+# prepare the diff directory and make sure it is empty
+mkdir -p diff
+rm -r diff/*
+
+for img in `cd base; ls *.png`
 do
-  echo "Processing $img"
-  compare -metric ae old/$img new/$img diff/$img
+  echo "Comparing $img"
+  compare -metric ae base/$img actual/$img diff/$img
 done
 
