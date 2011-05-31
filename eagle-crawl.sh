@@ -63,7 +63,10 @@ do
     URL=''
   fi
   echo "Taking screenshot of $BASE$URL"
+
+  # Replace slashes in path to fit in a filename.
+  FILE=${FILE/\//|}
+  
   CutyCapt --url=$BASE$URL --out=actual/$FILE.png
-  #compare -metric ae old/$img new/$img diff/$img
 done
 
