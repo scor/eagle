@@ -33,6 +33,10 @@ do
      esac
 done
 
+RED='\e[1;31m'
+GREEN='\e[1;32m'
+NC='\e[0m' # No Color
+
 # prepare the diff directory and make sure it is empty
 mkdir -p diff
 rm -rf diff/*
@@ -55,7 +59,7 @@ do
     URL=''
   fi
 
-  echo "Comparing screenshots for $NAME"
+  echo "-- Comparing screenshots for $NAME"
 
   #First compare the geometry/size of the images.
   if [ `identify -format %g base/$FILE.png` = `identify -format %g actual/$FILE.png` ]; then
@@ -64,11 +68,19 @@ do
 
     # Delete the diff file if there are no differences.
     if [ "$AE" = 0 ]; then
-      echo "No difference found for $NAME"
+      echo -e "${GREEN}No difference found for $NAME${NC}"
       rm diff/$FILE.png
+      # Move on to the next URL.
+      continue
     fi
-
   fi
+
+  # If we got here, it means the images are different.
+  echo -e "${RED}The screenshots for $NAME are different${NC}"
+  # The compare script might have already generated a diff image with the second image
+  # as background if both images were the same size.
+  # Generate a flicker since it does not require the images to be the same size.
+  convert -delay 50 base/$FILE.png actual/$FILE.png -loop 0 diff/$FILE.gif
 
 done
 
