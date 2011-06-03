@@ -14,6 +14,7 @@ EOF
 }
 
 VERSION=
+DIFF_FOUND=0
 
 # arguments followed by : take a value
 while getopts “hu:v” OPTION
@@ -77,12 +78,19 @@ do
 
   # If we got here, it means the images are different.
   echo -e "${RED}The screenshots for $NAME are different${NC}"
+  DIFF_FOUND=1
   # The compare script might have already generated a diff image with the second image
   # as background if both images were the same size.
   # Generate a flicker since it does not require the images to be the same size.
   convert -delay 50 base/$FILE.png actual/$FILE.png -loop 0 diff/$FILE.gif
 
 done
+
+# exit with error status if differences were found.
+if [ "$DIFF_FOUND" = "1" ]; then
+  echo 'Differences were found.'
+  exit 1
+fi
 
 # the convert command can create a flicker image which works for images which
 # are of different sizes
