@@ -65,12 +65,12 @@ do
   #First compare the geometry/size of the images.
   if [ `identify -format %g base/$FILE.png` = `identify -format %g actual/$FILE.png` ]; then
     # Calculate the absolute error between the two images
-    AE=`compare -metric ae base/$FILE.png actual/$FILE.png diff/$FILE$VERSION.png 2>&1`
+    AE=`compare -metric ae base/$FILE.png actual/$FILE.png diff/$FILE$VERSION.shadow.png 2>&1`
 
     # Delete the diff file if there are no differences.
     if [ "$AE" = 0 ]; then
       echo -e "${GREEN}No difference found for $NAME${NC}"
-      rm diff/$FILE.png
+      rm diff/$FILE$VERSION.shadow.png
       # Move on to the next URL.
       continue
     fi
@@ -81,8 +81,27 @@ do
   DIFF_FOUND=1
   # The compare script might have already generated a diff image with the second image
   # as background if both images were the same size.
-  # Generate a flicker since it does not require the images to be the same size.
-  convert -delay 50 base/$FILE.png actual/$FILE.png -loop 0 diff/$FILE.gif
+  # Generate other types of diff images in case the differences are not abvious.
+  # The methods below do not require both images to have the same size.
+
+  # Generate a composite difference image.
+  # The destination image determines the final size of the difference image,
+  # so use the taller screenshot as destination. The order of the image does
+  # matter as the difference compose method is associative.
+  BASE_H=`identify -format %h base/$FILE.png`
+  ACTUAL_H=`identify -format %h actual/$FILE.png`
+  if [ "$BASE_H" -ge "$ACTUAL_H" ]; then
+    composite actual/$FILE.png base/$FILE.png -compose difference diff/$FILE$VERSION.composite.png
+  else
+    composite base/$FILE.png actual/$FILE.png -compose difference diff/$FILE$VERSION.composite.png
+  fi
+
+  # Generate a flicker.
+  if [ "$BASE_H" -ge "$ACTUAL_H" ]; then
+    convert -delay 50 base/$FILE.png actual/$FILE.png -loop 0 diff/$FILE$VERSION.flicker.gif
+  else
+    convert -delay 50 actual/$FILE.png base/$FILE.png -loop 0 diff/$FILE$VERSION.flicker.gif
+  fi
 
 done
 
@@ -91,7 +110,3 @@ if [ "$DIFF_FOUND" = "1" ]; then
   echo 'Differences were found.'
   exit 1
 fi
-
-# the convert command can create a flicker image which works for images which
-# are of different sizes
-# give meaningful name to files so we know what version they are.
