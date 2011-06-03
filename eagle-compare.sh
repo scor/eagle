@@ -53,7 +53,7 @@ do
   NAME=$URL
 
   # Replace slashes in path to fit in a filename.
-  FILE=${URL/\//|}
+  FILE=${URL//\//|}
 
   # frontpage syntax
   if [ "$URL" = "<front>" ]; then
@@ -107,6 +107,6 @@ done
 
 # exit with error status if differences were found.
 if [ "$DIFF_FOUND" = "1" ]; then
-  echo 'Differences were found.'
+  echo 'At least one URL has differences.'
   exit 1
 fi

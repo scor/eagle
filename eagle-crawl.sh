@@ -64,9 +64,9 @@ do
   fi
   echo "Taking screenshot of $BASE$URL"
 
-  # Replace slashes in path to fit in a filename.
-  FILE=${FILE/\//|}
-  
+  # Replace all slashes in path to fit in a filename.
+  FILE=${FILE//\//|}
+
   CutyCapt --url=$BASE$URL --out=actual/$FILE.png
 done
 
